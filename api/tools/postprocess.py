@@ -38,20 +38,29 @@ def replace_text(data):
     pauses = get_time_lists(data)
     qs = quantiles(pauses['correct_pauses'])
     pauses['all_pauses'].append(0)
-    words = [word['word'] for word in data]
-    len_words = len(words)
+    len_words = len(data)
     text = ''
-    for e, (word, pause) in enumerate(zip(words, pauses['all_pauses'])):
+    start = None
+    for e, (row, pause) in enumerate(zip(data, pauses['all_pauses'])):
         if e == 0 or text[-2] == ".":
-            text += word.capitalize()
+            text += row['word'].capitalize()
+            start = row['start']
         else:
-            text += word
+            text += row['word']
         if pause > qs[2]:
-            text += '. '
+            time = ' --> '.join([start, row['end']]) + '\n'
+            print(time)
+            if text.find('.') != -1:
+                inx = text.rfind('.')
+                text = text[:inx + 2] + '\n' + time + text[inx + 2:] + '. '
+            else:
+                text = time + text + '. '
         elif pause > qs[1]:
             text += ', '
         elif e == len_words - 1:
-            text += '.'
+            time = ' --> '.join([start, row['end']]) + '\n'
+            inx = text.rfind('.')
+            text = text[:inx + 2] + '\n' + time + text[inx + 2:] + '.'
         else:
             text += ' '
     return text
