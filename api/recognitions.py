@@ -44,7 +44,17 @@ def save_data(string, file_name, headers):
     print(f'Saved {len(dicts)} dicts!')
 
 
-def recognize(language, file_path):
+def read_data(data_file):
+    '''read csv file and return list of dicts'''
+    dicts = []
+    with open(data_file) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            dicts.append(row)
+    return dicts
+
+
+def recognize(language, file_path, data_file):
     '''giperparameters, recognize, save, read and split text file'''
     sample_rate = 16000
     model = models[language]
@@ -54,7 +64,6 @@ def recognize(language, file_path):
     process = video_decoder(file_path, sample_rate) 
 
     # recognize and save to csv file
-    data_file = 'data.csv'
     headers = ["word", "start", "end", "conf"]
     make_data_file(data_file, headers)
 
@@ -66,18 +75,15 @@ def recognize(language, file_path):
             save_data(rec.Result(), data_file, headers)
     save_data(rec.FinalResult(), data_file, headers)
 
-    # read
-    dicts = []
-    with open(data_file) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            dicts.append(row)
-
     # result
     return replace_text(dicts)
 
 
 if __name__ == '__main__':
     language = 'en'
-    file_path = sys.argv[1]
-    print(recognize(language, file_path))
+    try:
+        file_path = sys.argv[1]
+    except IndexError:
+        pass
+    data_file = 'data.csv'
+    print(vtt_format(read_data(data_file)))

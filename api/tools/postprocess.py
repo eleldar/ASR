@@ -9,8 +9,7 @@ def get_dicts_list(string):
 
 def vtt_format(data):
     '''VTT format string'''
-    pass
-    return 
+    return replace_text(data)
 
 
 def get_time_lists(data, step=1):
