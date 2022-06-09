@@ -13,6 +13,8 @@ curdir = os.path.join(drive, path)
 # import tools
 sys.path.append(curdir)
 from tools.preprocess import video_decoder
+from tools.postprocess import vtt_format, get_dicts_list, replace_text
+
 
 # models init
 models_path = os.path.join(curdir, 'models')
@@ -22,6 +24,16 @@ models = {
 }
 
 
+def save_data(string, storage):
+    '''
+    temp solution for data save; will use temp file;
+    get time word pause
+    ! need list of dicts !
+    '''
+    dicts = get_dicts_list(string)
+    storage.extend(dicts)
+
+
 def recognize(language, file_path):
     sample_rate = 16000
     model = models[language]
@@ -29,21 +41,18 @@ def recognize(language, file_path):
     rec.SetWords(True)
     rec.SetPartialWords(True)
     process = video_decoder(file_path, sample_rate) 
+    temp_storage = [] # need list of dicts
     while True:
         data = process.stdout.read(4000)
         if len(data) == 0:
             break
         if rec.AcceptWaveform(data):
-            tmp = eval(rec.Result())
-            print(tmp['result'])
-        else:
-            pass
-#            print(rec.PartialResult())
-    tmp = eval(rec.FinalResult())
-    print(tmp['result'])
+            save_data(rec.Result(), temp_storage)
+    save_data(rec.FinalResult(), temp_storage)
+    return replace_text(temp_storage)
 
 
 if __name__ == '__main__':
     language = 'en'
     file_path = sys.argv[1]
-    recognize(language, file_path)
+    print(recognize(language, file_path))
