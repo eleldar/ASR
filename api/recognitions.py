@@ -4,6 +4,7 @@ import sys
 from vosk import Model, KaldiRecognizer, SetLogLevel
 from pathlib import Path
 import subprocess
+import csv 
 
 # cirrent paths for different OS
 drive, path_and_file = os.path.splitdrive(Path(__file__).absolute())
@@ -23,33 +24,57 @@ models = {
     'en': Model(os.path.join(models_path, 'en')),
 }
 
+def make_data_file(file_name, headers):
+    '''always make new file'''
+    with open(file_name, 'w', encoding='utf-8') as f:
+        f.write(f'{",".join(headers)}\n')
+    print(f'Maked new file: {file_name}')
 
-def save_data(string, storage):
-    '''
-    temp solution for data save; will use temp file;
-    get time word pause
-    ! need list of dicts !
-    '''
+def save_data(string, file_name, headers):
+    '''save to csv; need refactoring'''
     dicts = get_dicts_list(string)
-    storage.extend(dicts)
+    with open(file_name, 'a', newline='', encoding='utf-8') as f:
+        dictwriter_object = csv.DictWriter(f, fieldnames=headers)
+        for dct in dicts:
+            row = {
+                "word": dct["word"],"start": dct["start"], 
+                "end": dct["end"], "conf": dct["conf"]
+            }
+            dictwriter_object.writerow(row)
+    print(f'Saved {len(dicts)} dicts!')
 
 
 def recognize(language, file_path):
+    '''giperparameters, recognize, save, read and split text file'''
     sample_rate = 16000
     model = models[language]
     rec = KaldiRecognizer(model, sample_rate)
     rec.SetWords(True)
     rec.SetPartialWords(True)
     process = video_decoder(file_path, sample_rate) 
-    temp_storage = [] # need list of dicts
+
+    # recognize and save to csv file
+    data_file = 'data.csv'
+    headers = ["word", "start", "end", "conf"]
+    make_data_file(data_file, headers)
+
     while True:
-        data = process.stdout.read(4000)
-        if len(data) == 0:
+        frame = process.stdout.read(4000)
+        if len(frame) == 0:
             break
-        if rec.AcceptWaveform(data):
-            save_data(rec.Result(), temp_storage)
-    save_data(rec.FinalResult(), temp_storage)
-    return replace_text(temp_storage)
+        if rec.AcceptWaveform(frame):
+            save_data(rec.Result(), data_file, headers)
+    save_data(rec.FinalResult(), data_file, headers)
+
+    # read
+    dicts = []
+    with open(data_file) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            dicts.append(row)
+
+    # result
+    return replace_text(dicts)
 
 
 if __name__ == '__main__':

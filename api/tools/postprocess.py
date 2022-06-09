@@ -25,7 +25,7 @@ def get_time_lists(data, step=1):
     }
     for e, item in enumerate(data):
         if e < len(data) - 1:           
-            pause = data[e+1]['start'] - data[e]['end']
+            pause = float(data[e+1]['start']) - float(data[e]['end'])
             time_lists['all_pauses'].append(pause)
             if 0 < pause < step:
                 time_lists['correct_pauses'].append(pause)
