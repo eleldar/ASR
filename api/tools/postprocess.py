@@ -1,10 +1,24 @@
 #!/usr/bin/env python3
 from statistics import quantiles
 from random import randint
+import csv
+from datetime import datetime, timedelta
+
 
 def get_dicts_list(string):
     '''list of dicts from vosk recogtition'''
-    return eval(string)['result']
+    try:
+        return eval(string)['result']
+    except KeyError:
+        return None 
+
+
+def time_converter(time):
+    time = float(time)
+    time = str(timedelta(seconds=time)) 
+    time = '.'.join([time.split('.')[0], time.split('.')[1][:3]]) if '.' in time else f'{time}.000'
+    time = time.replace('.', ',')
+    return time.zfill(12) if len(time) < 12 else time
 
 
 def vtt_format(data):
@@ -17,7 +31,7 @@ def vtt_format(data):
         string = string.replace('.', '')
         string = string.replace(',', '')
         result += time + '\n'
-        result += string.lower() + '\n'
+        result += string + '\n'
         result += '\n'
     return result 
 
@@ -63,11 +77,12 @@ def replace_text(data):
     for e, (row, pause) in enumerate(zip(data, pauses['all_pauses'])):
         if e == 0 or text[-2] == ".":
             text += row['word'].capitalize()
-            start = row['start']
+            start = time_converter(row['start'])
         else:
             text += row['word']
         if pause > qs[2]:
-            time = ' --> '.join([start, row['end']]) + '\n'
+            end = time_converter(row['end'])
+            time = ' --> '.join([start, end]) + '\n'
             if text.find('.') != -1:
                 inx = text.rfind('.')
                 text = text[:inx + 2] + '\n' + time + text[inx + 2:] + '. '
@@ -76,7 +91,8 @@ def replace_text(data):
         elif pause > qs[1]:
             text += ', '
         elif e == len_words - 1:
-            time = ' --> '.join([start, row['end']]) + '\n'
+            end = time_converter(row['end'])
+            time = ' --> '.join([start, end]) + '\n'
             inx = text.rfind('.')
             text = text[:inx + 2] + '\n' + time + text[inx + 2:] + '.'
         else:
@@ -85,4 +101,13 @@ def replace_text(data):
 
 
 if __name__ == '__main__':
-    pass
+    data_file='../data.csv'
+    dates = []
+    with open(data_file) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            for key, value in row.items():
+                if key == 'start' or key == 'end':
+                    dates.append(value)
+    for date in dates:
+        print(time_converter(date))

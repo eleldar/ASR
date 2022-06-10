@@ -34,14 +34,15 @@ def make_data_file(file_name, headers):
 def save_data(string, file_name, headers):
     '''save to csv; need refactoring'''
     dicts = get_dicts_list(string)
-    with open(file_name, 'a', newline='', encoding='utf-8') as f:
-        dictwriter_object = csv.DictWriter(f, fieldnames=headers)
-        for dct in dicts:
-            row = {
-                "word": dct["word"],"start": dct["start"], 
-                "end": dct["end"], "conf": dct["conf"]
-            }
-            dictwriter_object.writerow(row)
+    if dicts:
+        with open(file_name, 'a', newline='', encoding='utf-8') as f:
+            dictwriter_object = csv.DictWriter(f, fieldnames=headers)
+            for dct in dicts:
+                row = {
+                    "word": dct["word"],"start": dct["start"], 
+                    "end": dct["end"], "conf": dct["conf"]
+                }
+                dictwriter_object.writerow(row)
 
 
 def read_data(data_file='data.csv'):
