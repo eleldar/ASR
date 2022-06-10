@@ -14,7 +14,7 @@ curdir = os.path.join(drive, path)
 # import tools
 sys.path.append(curdir)
 from tools.preprocess import video_decoder
-from tools.postprocess import vtt_format, get_dicts_list, replace_text
+from tools.postprocess import vtt_format, get_dicts_list 
 
 
 # models init
@@ -24,11 +24,12 @@ models = {
     'en': Model(os.path.join(models_path, 'en')),
 }
 
+
 def make_data_file(file_name, headers):
     '''always make new file'''
     with open(file_name, 'w', encoding='utf-8') as f:
         f.write(f'{",".join(headers)}\n')
-    print(f'Maked new file: {file_name}')
+
 
 def save_data(string, file_name, headers):
     '''save to csv; need refactoring'''
@@ -41,10 +42,9 @@ def save_data(string, file_name, headers):
                 "end": dct["end"], "conf": dct["conf"]
             }
             dictwriter_object.writerow(row)
-    print(f'Saved {len(dicts)} dicts!')
 
 
-def read_data(data_file):
+def read_data(data_file='data.csv'):
     '''read csv file and return list of dicts'''
     dicts = []
     with open(data_file) as f:
@@ -54,7 +54,7 @@ def read_data(data_file):
     return dicts
 
 
-def recognize(language, file_path, data_file):
+def recognize(language, file_path, data_file='data.csv'):
     '''giperparameters, recognize, save, read and split text file'''
     sample_rate = 16000
     model = models[language]
@@ -75,15 +75,15 @@ def recognize(language, file_path, data_file):
             save_data(rec.Result(), data_file, headers)
     save_data(rec.FinalResult(), data_file, headers)
 
-    # result
-    return replace_text(dicts)
+    # read data
+    return vtt_format(read_data(data_file))
 
 
 if __name__ == '__main__':
     language = 'en'
     try:
         file_path = sys.argv[1]
+        data_file = 'data.csv'
+        print(recognize(language, file_path, data_file))
     except IndexError:
-        pass
-    data_file = 'data.csv'
-    print(vtt_format(read_data(data_file)))
+        print('Not fount file mp4') 
