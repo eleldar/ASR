@@ -55,7 +55,7 @@ def read_data(data_file='data.csv'):
     return dicts
 
 
-def recognize(language, file_path, data_file='data.csv'):
+def recognize(file_path, language='en'):
     '''giperparameters, recognize, save, read and split text file'''
     sample_rate = 16000
     model = models[language]
@@ -65,6 +65,13 @@ def recognize(language, file_path, data_file='data.csv'):
     process = video_decoder(file_path, sample_rate) 
 
     # recognize and save to csv file
+    drive, path_and_file = os.path.splitdrive(Path(__file__).absolute())
+    path, file = os.path.split(path_and_file)
+    curdir = os.path.join(drive, path)
+
+    data_file = os.path.splitext(os.path.basename(file_path))[0] + '.csv'
+    data_file = os.path.join(curdir, 'tempfiles', 'tgt', data_file)
+
     headers = ["word", "start", "end", "conf"]
     make_data_file(data_file, headers)
 
@@ -73,18 +80,17 @@ def recognize(language, file_path, data_file='data.csv'):
         if len(frame) == 0:
             break
         if rec.AcceptWaveform(frame):
-            save_data(rec.Result(), data_file, headers)
-    save_data(rec.FinalResult(), data_file, headers)
-
+            output = rec.Result() 
+            save_data(output, data_file, headers)
+    output = rec.FinalResult()
+    save_data(output, data_file, headers)
     # read data
     return vtt_format(read_data(data_file))
 
 
 if __name__ == '__main__':
-    language = 'en'
     try:
         file_path = sys.argv[1]
-        data_file = 'data.csv'
-        print(recognize(language, file_path, data_file))
+        print(recognize(file_path))
     except IndexError:
         print('Not fount file mp4') 

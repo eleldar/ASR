@@ -3,3 +3,8 @@ api/models/
 api/tools/__pycache__/
 api/example.mp4
 api/__pycache__/
+api/save_test.py
+api/videoplayback.mp4
+data.csv
+api/tempfiles/tgt/*.csv
+api/tempfiles/src/*.mp4
