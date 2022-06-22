@@ -45,7 +45,7 @@ def save_data(string, file_name, headers):
                 dictwriter_object.writerow(row)
 
 
-def read_data(data_file='data.csv'):
+def read_data(data_file):
     '''read csv file and return list of dicts'''
     dicts = []
     with open(data_file) as f:
