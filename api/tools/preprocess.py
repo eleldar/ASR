@@ -37,28 +37,29 @@ def video_splitter(file_path, parts=3, tgt_type='mp4'):
     if os.path.exists(target_dir):
         shutil.rmtree(target_dir, ignore_errors=True)
     os.makedirs(target_dir)
-    start, end = video.start, video.end - (video.end - distance) if video.end > distance else video.end
+    start = video.start
+    end = distance if (video.end > distance) else video.end
     part = 0
     while True:
         part += 1
         tmp = video.subclip(start, end)
 
         if tgt_type in video_types:
-            tmp.write_videofile(os.path.join(target_dir, f'{str(part).zfill(3)}_{basename}.{tgt_type}'))
+            tmp.write_videofile(os.path.join(target_dir, 
+                f'{str(part).zfill(3)}_{basename}.{tgt_type}')
+            )
         elif tgt_type in audio_types:
-            tmp.audio.write_audiofile(os.path.join(target_dir, f'{str(part).zfill(3)}_{basename}.{tgt_type}'))
+            tmp.audio.write_audiofile(os.path.join(target_dir, 
+                f'{str(part).zfill(3)}_{basename}.{tgt_type}')
+            )
 
         if end == video.end:
             break
 
-        if video.end > (end + distance * 2):
-            start, end = start + distance, end + distance if (end + distance) < video.end else video.end 
-        else:
-            start, end = start + distance, video.end 
-
+        start = start + distance
+        end = end + distance if (end + distance * 2) <= video.end else video.end 
        
 
 if __name__ == '__main__':
-    #file_path = 'subvideos/emmerdale_wednesday_2_mar_7pm_1___sub_.B5oOQ.mp4'
-    file_path = '../example.mp4'
+    file_path = 'videoplayback.mp4'
     print(video_splitter(file_path))
