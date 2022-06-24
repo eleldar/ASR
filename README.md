@@ -16,7 +16,7 @@ mkdir models
 cd models
 wget "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip"
 unzip vosk-model-en-us-0.22-lgraph.zip
-mv vosk-model-en-us-0.22-lgraph.zip en
+mv vosk-model-en-us-0.22-lgraph en
 ```
 
 ## Using
