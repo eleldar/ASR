@@ -1,11 +1,7 @@
 from datetime import datetime, timedelta
 from typing import List, Tuple
-from video_reader import VideoReader
-import numpy as np
-from tesserocr import PyTessBaseAPI
-import Levenshtein
 
-from src.utils import frames_diff, get_time, get_mask
+from api.tools.utils import frames_diff, get_time, get_mask
 
 TIME_MASK = "%H:%M:%S,%f"
 
@@ -20,7 +16,7 @@ class Handler(object):
         self.current_text = None
 
     def start(self, video_path: str):
-        reader = VideoReader(video_path, batch_size=32, buffer_size=1024)
+        reader = None # VideoReader(video_path, batch_size=32, buffer_size=1024)
         self.video_info = reader.info
         self.video_info['current_frame'] = 0
         # Using Tesseracts wrapper
