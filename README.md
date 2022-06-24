@@ -11,7 +11,9 @@ apt install ffmpeg (for Windows using exe-file)
 
 ## Models
 ```
-cd api/models
+cd api
+mkdir models
+cd models
 wget "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip"
 unzip vosk-model-en-us-0.22-lgraph.zip
 mv vosk-model-en-us-0.22-lgraph.zip en
