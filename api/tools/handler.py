@@ -1,13 +1,7 @@
-import os
-from datetime import datetime, timedelta
-from typing import List, Tuple
 import moviepy.editor as mp
-from api.tools.utils import frames_diff, get_time, get_mask
-from pathlib import Path
 from api.recognitions import recognize
 import filetype as ft
 
-TIME_MASK = "%H:%M:%S,%f"
 
 class Handler(object):
     def __init__(self):
@@ -45,7 +39,7 @@ class Handler(object):
 
     def get_result(self):
         '''baseline'''
-        return self.text if self.text else 'In progress. Please wait :)'
+        return self.text
 
 
     def get_status(self):

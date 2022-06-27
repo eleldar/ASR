@@ -1,5 +1,5 @@
 import threading
-from random import randint, choice
+from random import choice
 import os
 from pathlib import Path
 
@@ -14,11 +14,12 @@ curdir = os.path.join(drive, path)
 alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 get_file_prefix = lambda: ''.join(choice(alphabet) for _ in range(32))
 
+
 def check_tasks(func):
     @wraps(func)
     def wrapper(self, task_id):
         if task_id not in self.task_ids:
-            return '', f'Task {task_id} doesn\'t exist.', 0, 0
+            return 'bad id' 
         else:
             method_output = func(self, task_id)
             return method_output
@@ -28,8 +29,8 @@ def check_tasks(func):
 class Manager(object):
     def __init__(self):
         self.handlers = []
-        self.current_handler = -1
         self.task_ids = []
+
 
     def start(self, file):
         task_id = get_file_prefix()
@@ -45,21 +46,13 @@ class Manager(object):
         self.task_ids.append(task_id)
         return task_id
 
+
     @check_tasks
     def get_results(self, task_id):
         handler_idx = self.task_ids.index(task_id)
-        result = self.handlers[handler_idx].get_result()  # translated result in API
-        return result
+        result = self.handlers[handler_idx].get_result()
+        return result if result else 'on processing'
 
-    @check_tasks
-    def get_status(self, task_id):
-        handler_idx = self.task_ids.index(task_id)
-        return self.handlers[handler_idx].get_status() 
 
     def get_tasks(self):
         return self.task_ids
-
-
-
-
-
