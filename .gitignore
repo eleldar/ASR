@@ -8,3 +8,6 @@ api/videoplayback.mp4
 data.csv
 api/tempfiles/tgt/*.csv
 api/tempfiles/src/*.mp4
+api/tempfiles/src/*.wav
+api/short_audio.wav
+api/short_video.mp4
