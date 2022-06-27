@@ -84,8 +84,7 @@ def recognize(file_path, language='en'):
             save_data(output, data_file, headers)
     output = rec.FinalResult()
     save_data(output, data_file, headers)
-    # read data
-    return vtt_format(read_data(data_file))
+    return data_file 
 
 
 if __name__ == '__main__':

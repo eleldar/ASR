@@ -28,8 +28,9 @@ def check_tasks(func):
 
 class Manager(object):
     def __init__(self):
-        self.handlers = []
-        self.task_ids = []
+        dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'tgt') 
+        self.task_ids = [i.split('_')[0] for i in os.listdir(dir_local_path) if '_' in i]
+        self.handlers = [Handler(os.path.join(dir_local_path, i)) for i in os.listdir(dir_local_path) if '_' in i and 'csv' in i]
 
 
     def start(self, file):
@@ -49,9 +50,12 @@ class Manager(object):
 
     @check_tasks
     def get_results(self, task_id):
+        dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'tgt')
         handler_idx = self.task_ids.index(task_id)
-        result = self.handlers[handler_idx].get_result()
-        return result if result else 'on processing'
+        try:
+            return self.handlers[handler_idx].get_result()
+        except TypeError:
+            return 'on processing'
 
 
     def get_tasks(self):
