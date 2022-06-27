@@ -44,6 +44,11 @@ result_response = api.model('ResultResponse', {
 })
 
 
+tasks_response = api.model('TasksResponse', {
+    'task_list': fields.List(fields.String)
+})
+
+
 alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 get_file_prefix = lambda: ''.join(choice(alphabet) for _ in range(32))
 
@@ -113,6 +118,14 @@ class DetectApi(Resource):
         result = manager.get_results(task_id=task_id)
         return {'result': result}, 200
 
+
+@namespace.route('/tasks')
+class DetectApi(Resource):
+    @namespace.doc('AllTaskIDs')
+    @namespace.marshal_with(tasks_response, code=200)
+    def get(self):
+        tasks_ids = manager.get_tasks()
+        return {'task_list': tasks_ids}, 200
 
 
 
