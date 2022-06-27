@@ -34,6 +34,16 @@ start_response = api.model('StartResponse', {
 })
 
 
+task_info = api.model('TaskInfo', {
+    'id': fields.String
+})
+
+
+result_response = api.model('ResultResponse', {
+    'result': fields.String
+})
+
+
 alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 get_file_prefix = lambda: ''.join(choice(alphabet) for _ in range(32))
 
@@ -90,6 +100,20 @@ class DetectApi(Resource):
 
         task_id = manager.start(file)
         return {'task_id': task_id}, 201
+
+
+@namespace.route('/result')
+class DetectApi(Resource):
+    @namespace.doc('ProcessedSubtitles')
+    @namespace.expect(task_info)
+    @namespace.marshal_with(result_response, code=200)
+    def post(self):
+        data = api.payload
+        task_id = data['id']
+        result = manager.get_results(task_id=task_id)
+        return {'result': result}, 200
+
+
 
 
 if __name__ == '__main__':
