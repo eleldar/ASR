@@ -1,5 +1,5 @@
 import threading
-from random import choice
+from random import choice, sample
 import os
 from pathlib import Path
 
@@ -11,8 +11,12 @@ drive, path_and_file = os.path.splitdrive(Path(__file__).absolute())
 path, file = os.path.split(path_and_file)
 curdir = os.path.join(drive, path)
 
-alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-get_file_prefix = lambda: ''.join(choice(alphabet) for _ in range(32))
+alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' 
+name_power = 32
+
+def get_file_prefix(alphabet=alphabet, name_power=name_power):
+    shuffled_alphabet = sample(alphabet, len(alphabet))
+    return ''.join(choice(shuffled_alphabet) for _ in range(name_power))
 
 
 def check_tasks(func):
@@ -26,19 +30,30 @@ def check_tasks(func):
     return wrapper
 
 
-class Manager(object):
+class Manager():
     def __init__(self):
-        dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'tgt') 
-        self.task_ids = [i.split('_')[0] for i in os.listdir(dir_local_path) if '_' in i]
-        self.handlers = [Handler(os.path.join(dir_local_path, i)) for i in os.listdir(dir_local_path) if '_' in i and 'csv' in i]
+        dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'tgt')
+        self.task_ids = []
+        self.handlers = []
+        for file in os.listdir(dir_local_path):
+            basename = os.path.basename(file)
+            task_id, _ = basename.split('.')
+            correct_id = True if not (
+                set(task_id) - (set(task_id) & set(alphabet))
+            ) and len (task_id) == name_power else False
+            if correct_id:
+                self.task_ids.append(task_id)
+                self.handlers.append(Handler(os.path.join(dir_local_path, basename)))
 
 
     def start(self, file):
         task_id = get_file_prefix()
         dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'src') 
+        file_extension = os.path.splitext(os.path.basename(file.filename))[-1]
+
         file_path = os.path.join(
             dir_local_path,  
-            f'{task_id}_{file.filename}'
+            f'{task_id}{file_extension}'
         )
         file.save(file_path)
         handler = Handler()
