@@ -50,6 +50,7 @@ tasks_response = api.model('TasksResponse', {
 })
 
 
+
 alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 get_file_prefix = lambda: ''.join(choice(alphabet) for _ in range(32))
 
@@ -74,7 +75,7 @@ class DetectApi(Resource):
 
 @namespace.route('/result')
 class DetectApi(Resource):
-    @namespace.doc('ProcessedSubtitles')
+    @namespace.doc('ProcessedText')
     @namespace.expect(task_info)
     @namespace.marshal_with(result_response, code=200)
     def post(self):

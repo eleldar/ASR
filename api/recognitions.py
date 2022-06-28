@@ -48,11 +48,14 @@ def save_data(string, file_name, headers):
 def read_data(data_file):
     '''read csv file and return list of dicts'''
     dicts = []
-    with open(data_file) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            dicts.append(row)
-    return dicts
+    try:
+        with open(data_file) as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                dicts.append(row)
+        return dicts
+    except FileNotFoundError:
+        return
 
 
 def recognize(file_path, language='en'):
@@ -84,6 +87,7 @@ def recognize(file_path, language='en'):
             save_data(output, data_file, headers)
     output = rec.FinalResult()
     save_data(output, data_file, headers)
+    os.remove(file_path)
     return data_file 
 
 

@@ -11,17 +11,33 @@ drive, path_and_file = os.path.splitdrive(Path(__file__).absolute())
 path, file = os.path.split(path_and_file)
 curdir = os.path.join(drive, path)
 
+
 alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' 
 name_power = 32
+
 
 def get_file_prefix(alphabet=alphabet, name_power=name_power):
     shuffled_alphabet = sample(alphabet, len(alphabet))
     return ''.join(choice(shuffled_alphabet) for _ in range(name_power))
 
 
+def ids_from_tgt_dir(dir_local_path):
+    ids = []
+    for file in os.listdir(dir_local_path):
+        basename = os.path.basename(file)
+        task_id, _ = basename.split('.')
+        correct_id = True if not (
+            set(task_id) - (set(task_id) & set(alphabet))
+        ) and len (task_id) == name_power else False
+        if correct_id:
+            ids.append(task_id)
+    return set(ids)
+
+
 def check_tasks(func):
     @wraps(func)
     def wrapper(self, task_id):
+        dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'tgt')
         if task_id not in self.task_ids:
             return 'bad id' 
         else:
@@ -66,12 +82,16 @@ class Manager():
     @check_tasks
     def get_results(self, task_id):
         dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'tgt')
+        exists = ids_from_tgt_dir(dir_local_path)
         handler_idx = self.task_ids.index(task_id)
         try:
             return self.handlers[handler_idx].get_result()
         except TypeError:
-            return 'on processing'
+            if task_id in ids_from_tgt_dir(dir_local_path):
+                return 'on processing'
+            return 'bad id'
 
-
+    
     def get_tasks(self):
+        self.__init__()
         return self.task_ids
