@@ -14,7 +14,8 @@ curdir = os.path.join(drive, path)
 
 alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' 
 name_power = 32
-
+current_handlers = []
+current_task_ids = []
 
 def get_file_prefix(alphabet=alphabet, name_power=name_power):
     shuffled_alphabet = sample(alphabet, len(alphabet))
@@ -49,6 +50,8 @@ def check_tasks(func):
 class Manager():
     def __init__(self):
         dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'tgt')
+        src_local_path = os.path.join(curdir, '..', 'tempfiles', 'src')
+        src = {i.split('.')[0] for i in os.listdir(src_local_path)}
         self.task_ids = []
         self.handlers = []
         for file in os.listdir(dir_local_path):
@@ -57,9 +60,13 @@ class Manager():
             correct_id = True if not (
                 set(task_id) - (set(task_id) & set(alphabet))
             ) and len (task_id) == name_power else False
-            if correct_id:
+            if correct_id and task_id not in src:
                 self.task_ids.append(task_id)
                 self.handlers.append(Handler(os.path.join(dir_local_path, basename)))
+        for task_id, handler in zip(current_task_ids, current_handlers):
+            if task_id not in self.task_ids:
+                self.task_ids.append(task_id)
+                self.handlers.append(handler)
 
 
     def start(self, file):
@@ -74,6 +81,8 @@ class Manager():
         file.save(file_path)
         handler = Handler()
         threading.Thread(target=handler.start, args=(file_path,), daemon=True).start()
+        current_handlers.append(handler)
+        current_task_ids.append(task_id)
         self.handlers.append(handler)
         self.task_ids.append(task_id)
         return task_id
@@ -91,7 +100,24 @@ class Manager():
                 return 'on processing'
             return 'bad id'
 
-    
+    @check_tasks
+    def delete_task(self, task_id):
+        dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'tgt')
+        ids = ids_from_tgt_dir(dir_local_path)
+        if task_id in ids_from_tgt_dir(dir_local_path) and self.get_results(task_id) != 'on processing':
+            file = f'{task_id}.csv'
+            file_path = os.path.join(dir_local_path, file) 
+            os.remove(file_path)
+            if task_id in current_task_ids:
+                inx = current_task_ids.index(task_id)
+                del current_handlers[inx]
+                del current_task_ids[inx]
+            self.__init__()
+            return f'task {task_id} deleted'
+        return 'bad id'
+
+
     def get_tasks(self):
+        '''need check by media file'''
         self.__init__()
-        return self.task_ids
+        return list(set(self.task_ids))

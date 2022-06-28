@@ -5,7 +5,6 @@ from flask import Flask
 from flask_restx import Resource, Api, fields
 from flask_cors import CORS, cross_origin
 from werkzeug.datastructures import FileStorage
-from random import randint, choice
 from api.recognitions import recognize
 from time import time
 from datetime import timedelta
@@ -50,9 +49,10 @@ tasks_response = api.model('TasksResponse', {
 })
 
 
+delete_task = api.model('DeleteTask', {
+    'result': fields.String
+})
 
-alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-get_file_prefix = lambda: ''.join(choice(alphabet) for _ in range(32))
 
 upload_parser = api.parser()
 upload_parser.add_argument('file', location='files',
@@ -92,6 +92,18 @@ class DetectApi(Resource):
     def get(self):
         tasks_ids = manager.get_tasks()
         return {'task_list': tasks_ids}, 200
+
+
+@namespace.route('/delete')
+class DetectApi(Resource):
+    @namespace.doc('DelTask')
+    @namespace.expect(task_info)
+    @namespace.marshal_with(delete_task, code=200)
+    def delete(self):
+        data = api.payload
+        task_id = data['id']
+        result = manager.delete_task(task_id=task_id)
+        return {'result': result}, 200
 
 
 
