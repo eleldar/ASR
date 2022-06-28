@@ -4,6 +4,8 @@ import filetype as ft
 import moviepy.editor as mp
 from api.recognitions import recognize, read_data
 from tools.postprocess import vtt_format, get_dicts_list
+from time import time
+from datetime import timedelta
 
 # cirrent paths for different OS
 drive, path_and_file = os.path.splitdrive(Path(__file__).absolute())
@@ -35,11 +37,20 @@ def get_file_info(filetype):
 class Handler():
     def __init__(self, data_file=None):
         self.file_info = {'data_file': data_file} 
+        self.times = {
+           'time': None,
+        }
 
     def start(self, file):
+        start = time()
         self.file_info['filetype'] = ft.guess(file).mime if ft.guess(file) else None       
         self.file_info['data_file'] = recognize(file)
-        print('Debuger result form handler:', self.file_info['data_file'])
+        self.times['time'] = str(timedelta(seconds = time() - start))
+        print(
+            'Time recognition for', 
+            os.path.basename(self.file_info['data_file']).split('.')[0], 
+            'is', self.times['time']
+        )
 
 
     def get_result(self):
