@@ -8,8 +8,7 @@ from werkzeug.datastructures import FileStorage
 from api.recognitions import recognize
 from time import time
 from datetime import timedelta
-from api.tools.manager import Manager
-
+from argparse import ArgumentParser
 
 # Local path settings
 drive, path_and_file = os.path.splitdrive(Path(__file__).absolute())
@@ -17,6 +16,7 @@ path, file = os.path.split(path_and_file)
 curdir = os.path.join(drive, path)
 
 app = Flask(__name__)
+app.config['RESTPLUS_MASK_SWAGGER'] = False
 api = Api(
     app, 
     version='1.0',
@@ -58,7 +58,9 @@ upload_parser = api.parser()
 upload_parser.add_argument('file', location='files',
                             type=FileStorage, required=True
                           )
-manager = Manager()
+
+
+
 
 @namespace.route('/start')
 class DetectApi(Resource):
@@ -108,7 +110,40 @@ class DetectApi(Resource):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    default_host = '127.0.0.1'
+    default_port = '5000'
+    deafault_max_threads = '2'
+
+    parser = ArgumentParser()
+
+    parser.add_argument(
+        "-ht", "--host", dest="host", default=default_host,
+        help=f'Enter connect host; default="{default_host}"'
+    )
+    parser.add_argument(
+        "-p", "--port", dest="port", default=default_port,
+        help=f'Enter connect port; default="{default_port}"'
+    )
+    parser.add_argument(
+        "-t", "--threads", dest="threads", default=deafault_max_threads,
+        help=f'Enter max threads; default="{deafault_max_threads}"'
+    )
+
+    args = parser.parse_args()
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
+
+    # Temp solution; neen use class--------
+    os.environ['MAX_THREADS'] = args.threads 
+    from api.tools.manager import Manager
+    manager = Manager()
+    # -------------------------------------
+
+    app.run(
+        host = args.host,
+        port = args.port,
+        debug = True
+    )
+
 
 
 

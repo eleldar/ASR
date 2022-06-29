@@ -1,6 +1,7 @@
 import threading
 from random import choice, sample
 import os
+import sys
 from pathlib import Path
 
 from functools import wraps
@@ -11,6 +12,8 @@ drive, path_and_file = os.path.splitdrive(Path(__file__).absolute())
 path, file = os.path.split(path_and_file)
 curdir = os.path.join(drive, path)
 
+# Temp solution!
+MAX_THREADS = int(os.getenv('MAX_THREADS'))
 
 alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' 
 name_power = 32
@@ -47,6 +50,27 @@ def check_tasks(func):
     return wrapper
 
 
+class ActivePool:
+    def __init__(self):
+        super(ActivePool, self).__init__()
+        self.active = []
+        self.lock = threading.Lock()
+
+    def makeActive(self, name):
+        with self.lock:
+            self.active.append(name)
+            print(f'Running before: {self.active}')
+
+    def makeInactive(self, name):
+        with self.lock:
+            self.active.remove(name)
+            print(f'Running after: {self.active}')
+
+# temp solution!
+sem = threading.Semaphore(MAX_THREADS)
+pool = ActivePool()
+
+
 class Manager():
     def __init__(self):
         dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'tgt')
@@ -80,7 +104,7 @@ class Manager():
         )
         file.save(file_path)
         handler = Handler()
-        threading.Thread(target=handler.start, args=(file_path,), daemon=True).start()
+        threading.Thread(target=handler.start, args=(file_path, sem, pool), daemon=True).start()
         current_handlers.append(handler)
         current_task_ids.append(task_id)
         self.handlers.append(handler)

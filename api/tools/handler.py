@@ -1,4 +1,5 @@
 import os
+import threading
 from pathlib import Path
 import filetype as ft
 import moviepy.editor as mp
@@ -11,7 +12,6 @@ from datetime import timedelta
 drive, path_and_file = os.path.splitdrive(Path(__file__).absolute())
 path, file = os.path.split(path_and_file)
 curdir = os.path.join(drive, path)
-
 
 def get_file_info(filetype):
     '''file info from filetype.guess method'''
@@ -41,16 +41,21 @@ class Handler():
            'time': None,
         }
 
-    def start(self, file):
-        start = time()
-        self.file_info['filetype'] = ft.guess(file).mime if ft.guess(file) else None       
-        self.file_info['data_file'] = recognize(file)
-        self.times['time'] = str(timedelta(seconds = time() - start))
-        print(
-            'Time recognition for', 
-            os.path.basename(self.file_info['data_file']).split('.')[0], 
-            'is', self.times['time']
-        )
+    def start(self, file, sem, pool):
+        with sem:
+            th_name = threading.current_thread().name
+            print(f'Wait {th_name}')
+            pool.makeActive(th_name)
+            start = time()
+            self.file_info['filetype'] = ft.guess(file).mime if ft.guess(file) else None       
+            self.file_info['data_file'] = recognize(file)
+            self.times['time'] = str(timedelta(seconds = time() - start))
+            print(
+                'Time recognition for', 
+                 os.path.basename(self.file_info['data_file']).split('.')[0], 
+                'is', self.times['time']
+            )
+            pool.makeInactive(th_name)
 
 
     def get_result(self):
