@@ -110,6 +110,39 @@ class DetectApi(Resource):
 
 
 if __name__ == '__main__':
+    def ids_from_local_path(dir_local_path):
+        ids = []
+        for file in os.listdir(dir_local_path):
+            alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+            name_power = 32
+            basename = os.path.basename(file)
+            task_id, ext = basename.split('.')
+            correct_id = True if not (
+                set(task_id) - (set(task_id) & set(alphabet))
+            ) and len (task_id) == name_power else False
+            if correct_id:
+                ids.append(task_id)
+        return set(ids)
+    dir_src_path = os.path.join(curdir, 'api', 'tempfiles', 'src')
+    dir_tgt_path = os.path.join(curdir, 'api', 'tempfiles', 'tgt')
+    files_src_path = set(ids_from_local_path(dir_src_path))
+    files_tgt_path = set(ids_from_local_path(dir_tgt_path))
+    delete_tgt_list = files_src_path & files_tgt_path 
+
+    for file in os.listdir(dir_src_path):
+        basename = os.path.basename(file)
+        task_id, ext = basename.split('.')
+        if task_id in files_src_path:
+            file = os.path.join(dir_src_path, file)  
+            os.remove(file)
+
+    for file in os.listdir(dir_tgt_path):
+        basename = os.path.basename(file)
+        task_id, ext = basename.split('.')
+        if task_id in delete_tgt_list:
+            file = os.path.join(dir_tgt_path, file)  
+            os.remove(file)
+
     default_host = '127.0.0.1'
     default_port = '5000'
     deafault_max_threads = '2'

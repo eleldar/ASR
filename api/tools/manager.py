@@ -25,7 +25,8 @@ def get_file_prefix(alphabet=alphabet, name_power=name_power):
     return ''.join(choice(shuffled_alphabet) for _ in range(name_power))
 
 
-def ids_from_tgt_dir(dir_local_path):
+
+def ids_from_local_path(dir_local_path):
     ids = []
     for file in os.listdir(dir_local_path):
         basename = os.path.basename(file)
@@ -36,6 +37,7 @@ def ids_from_tgt_dir(dir_local_path):
         if correct_id:
             ids.append(task_id)
     return set(ids)
+
 
 
 def check_tasks(func):
@@ -114,21 +116,21 @@ class Manager():
 
     @check_tasks
     def get_results(self, task_id):
-        dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'tgt')
-        exists = ids_from_tgt_dir(dir_local_path)
+        dir_tgt_path = os.path.join(curdir, '..', 'tempfiles', 'tgt')
+        dir_src_path = os.path.join(curdir, '..', 'tempfiles', 'src')
         handler_idx = self.task_ids.index(task_id)
         try:
             return self.handlers[handler_idx].get_result()
         except TypeError:
-            if task_id in ids_from_tgt_dir(dir_local_path):
+            if task_id in ids_from_local_path(dir_tgt_path) or ids_from_local_path(dir_src_path):
                 return 'on processing'
             return 'bad id'
 
     @check_tasks
     def delete_task(self, task_id):
         dir_local_path = os.path.join(curdir, '..', 'tempfiles', 'tgt')
-        ids = ids_from_tgt_dir(dir_local_path)
-        if task_id in ids_from_tgt_dir(dir_local_path) and self.get_results(task_id) != 'on processing':
+        ids = ids_from_local_path(dir_local_path)
+        if task_id in ids_from_local_path(dir_local_path) and self.get_results(task_id) != 'on processing':
             file = f'{task_id}.csv'
             file_path = os.path.join(dir_local_path, file) 
             os.remove(file_path)
