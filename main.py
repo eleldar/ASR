@@ -44,6 +44,10 @@ result_response = api.model('ResultResponse', {
 })
 
 
+status_response = api.model('StatusResponse', {
+    'status': fields.String
+})
+
 tasks_response = api.model('TasksResponse', {
     'task_list': fields.List(fields.String)
 })
@@ -58,8 +62,6 @@ upload_parser = api.parser()
 upload_parser.add_argument('file', location='files',
                             type=FileStorage, required=True
                           )
-
-
 
 
 @namespace.route('/start')
@@ -80,11 +82,30 @@ class DetectApi(Resource):
     @namespace.doc('ProcessedText')
     @namespace.expect(task_info)
     @namespace.marshal_with(result_response, code=200)
+    @namespace.response(404, 'No results')
     def post(self):
         data = api.payload
         task_id = data['id']
         result = manager.get_results(task_id=task_id)
-        return {'result': result}, 200
+        if result == "bad id" or result == "on processing":
+            return {'result': result}, 404
+        else:
+            return {'result': result}, 200
+
+
+@namespace.route('/getstatus')
+class DetectApi(Resource):
+    @namespace.doc('StatusResponse')
+    @namespace.expect(task_info)
+    @namespace.marshal_with(status_response, code=200)
+    def post(self):
+        data = api.payload
+        task_id = data['id']
+        result = manager.get_results(task_id=task_id)
+        if result == "bad id" or result == "on processing":
+            return {'status': result}, 200
+        else:
+            return {'status': 'done'}, 200
 
 
 @namespace.route('/tasks')
@@ -106,7 +127,6 @@ class DetectApi(Resource):
         task_id = data['id']
         result = manager.delete_task(task_id=task_id)
         return {'result': result}, 200
-
 
 
 if __name__ == '__main__':
@@ -143,9 +163,9 @@ if __name__ == '__main__':
             file = os.path.join(dir_tgt_path, file)  
             os.remove(file)
 
-    default_host = '127.0.0.1'
+    default_host = '0.0.0.0'
     default_port = '5000'
-    deafault_max_threads = '2'
+    deafault_max_threads = '5'
 
     parser = ArgumentParser()
 
@@ -174,7 +194,7 @@ if __name__ == '__main__':
     app.run(
         host = args.host,
         port = args.port,
-        debug = True
+#        debug = True
     )
 
 

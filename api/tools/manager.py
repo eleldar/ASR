@@ -61,12 +61,10 @@ class ActivePool:
     def makeActive(self, name):
         with self.lock:
             self.active.append(name)
-            print(f'Running before: {self.active}')
 
     def makeInactive(self, name):
         with self.lock:
             self.active.remove(name)
-            print(f'Running after: {self.active}')
 
 # temp solution!
 sem = threading.Semaphore(MAX_THREADS)
