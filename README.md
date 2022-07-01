@@ -2,6 +2,7 @@
 
 ## Environment
 ```
+cd ASR
 python3 -m venv venv
 . venv/bin/activate
 pip install -r requirements.txt
@@ -24,6 +25,19 @@ mv vosk-model-en-us-0.22-lgraph en
 python main.py
 ```
 from browser open adress 127.0.0.1:5000/api
+
+## API methods
+* start - загрузка видео/аудио и получение id
+* tasks - получение списка задач (сохраняются до явного удаления)
+* удаление задачи по ID
+* getstatus - получение статуса по ID:
+  - "bad id" - нет такой задачи;
+  - "on processing" - в процессе выполнения;
+  - "done" - готовый результат.
+* result - получение результата по ID (внимание на код HTTP):
+  - 200 - распознанный текст в формате VTT
+  - 404 - ошибка с уточнением результатв "bad id" или "on processing"
+
 
 ## Structure
 ```
