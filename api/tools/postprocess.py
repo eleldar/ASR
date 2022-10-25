@@ -17,7 +17,7 @@ def time_converter(time):
     time = float(time)
     time = str(timedelta(seconds=time)) 
     time = '.'.join([time.split('.')[0], time.split('.')[1][:3]]) if '.' in time else f'{time}.000'
-    time = time.replace('.', ',')
+#    time = time.replace('.', ',')
     return time.zfill(12) if len(time) < 12 else time
 
 
