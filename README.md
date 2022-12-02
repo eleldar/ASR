@@ -1,30 +1,38 @@
 # ASR service
 
+## Instalation
+```
+# apt update
+# apt -y install wget
+# apt install software-properties-common
+# add-apt-repository ppa:deadsnakes/ppa
+# apt install python3.9
+# apt install python3-pip
+# apt install python3.9-distutils
+# apt install python3.9-venv
+# apt install python3.9-dev
+# apt install ffmpeg (for Windows using exe-file)
+$ wget https://bootstrap.pypa.io/get-pip.py
+$ python3.9 get-pip.py
+$ python3.9 -m pip install --upgrade pip
+```
+
 ## Environment
 ```
 cd ASR
 python3 -m venv venv
 . venv/bin/activate
 pip install -r requirements.txt
-apt install ffmpeg (for Windows using exe-file)
-```
-
-
-## Models
-```
-cd api
-mkdir models
-cd models
-wget "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip"
-unzip vosk-model-en-us-0.22-lgraph.zip
-mv vosk-model-en-us-0.22-lgraph en
+cd api && mkdir models
+cd models && wget "https://alphacephei.com/vosk/models/vosk-model-en-us-0.42-gigaspeech.zip"
+unzip vosk-model-en-us-0.42-gigaspeech.zip && mv vosk-model-en-us-0.42-gigaspeech.zip en
 ```
 
 ## Using
 ```
-python main.py
+python main.py [--host='0.0.0.0'] [--port=5000] [--threads=5]
 ```
-from browser open adress 127.0.0.1:5000/api
+OpenAPI documentation accessed on parh: `http://<host>:<port>/api`
 
 ## API methods
 * start - загрузка видео/аудио и получение id
